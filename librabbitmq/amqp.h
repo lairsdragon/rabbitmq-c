@@ -267,6 +267,9 @@ AMQP_CALL amqp_version(void);
  */
 #define AMQP_DEFAULT_HEARTBEAT 0
 
+/**
+ * boolean type 0 = false, true otherwise
+ */
 typedef int amqp_boolean_t;
 
 /**
@@ -561,9 +564,10 @@ AMQP_END_DECLS
 AMQP_BEGIN_DECLS
 
 /**
- * Gets the version of rabbitmq-c
+ * Gets the version string of the rabbitmq-c library
  *
- * @return string representation of the library. Statically allocated, does not need to be freed
+ * @return string representation of the library version.
+ *         Statically allocated, does not need to be freed.
  */
 AMQP_PUBLIC_FUNCTION
 char const *
@@ -591,7 +595,7 @@ AMQP_PUBLIC_VARIABLE const amqp_array_t amqp_empty_array;
 #define AMQP_EMPTY_ARRAY amqp_empty_array   /**< @deprecated use amqp_empty_array instead. This is here only for backwards compatibility */
 
 /**
- * Initializes a amqp_pool_t memory allocation pool
+ * Initializes an amqp_pool_t memory allocation pool
  *
  * Readies an allocation pool for use. An amqp_pool_t
  * must be initialized before use
@@ -629,7 +633,7 @@ void
 AMQP_CALL recycle_amqp_pool(amqp_pool_t *pool);
 
 /**
- * Destroys an amqp_pool_t memory allocation pool
+ * Empties an amqp memory pool, f
  *
  * This is a frees all memory associated with an amqp_pool_t
  *
@@ -1064,7 +1068,7 @@ AMQP_CALL amqp_get_rpc_reply(amqp_connection_state_t state);
  * @param [in] heartbeat the number of seconds between heartbeat frames to
  *              request of the broker. A value of 0 disables heartbeats.
  *              NOTE: rabbitmq-c does not support heartbeats, your best bet
- *              is not to implement this.
+ *              is to disable it by leaving this at 0
  * @param [in] sasl_method the SASL method to authenticate with the broker.
  *              followed by the authentication information.
  *              For AMQP_SASL_METHOD_PLAIN, the AMQP_SASL_METHOD_PLAIN
