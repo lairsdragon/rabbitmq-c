@@ -590,9 +590,9 @@ AMQP_PUBLIC_VARIABLE const amqp_array_t amqp_empty_array;
 
 /* Compatibility macros for the above, to avoid the need to update
    code written against earlier versions of librabbitmq. */
-#define AMQP_EMPTY_BYTES amqp_empty_bytes   /**< @deprecated use amqp_empty_bytes instead. This is here only for backwards compatibility */
-#define AMQP_EMPTY_TABLE amqp_empty_table   /**< @deprecated use amqp_emtpy_table instead. This is here only for backwards compatibility */
-#define AMQP_EMPTY_ARRAY amqp_empty_array   /**< @deprecated use amqp_empty_array instead. This is here only for backwards compatibility */
+#define AMQP_EMPTY_BYTES amqp_empty_bytes   /**< @deprecated use amqp_empty_bytes instead. */
+#define AMQP_EMPTY_TABLE amqp_empty_table   /**< @deprecated use amqp_emtpy_table instead. */
+#define AMQP_EMPTY_ARRAY amqp_empty_array   /**< @deprecated use amqp_empty_array instead. */
 
 /**
  * Initializes an amqp_pool_t memory allocation pool
@@ -873,16 +873,21 @@ void
 AMQP_CALL amqp_maybe_release_buffers(amqp_connection_state_t state);
 
 /**
+ *
+ * @param [in] state
+ * @param [in] channel
+ */
+AMQP_PUBLIC_FUNCTION
+void
+AMQP_CALL amqp_maybe_release_buffers_on_channel(amqp_connection_state_t state, amqp_channel_t channel);
+
+/**
  * Send a frame to the broker
  *
  * @param [in] state the connection object
  * @param [in] frame the frame to send to the broker
  * @return 0 on success, 0 > on error
  */
-AMQP_PUBLIC_FUNCTION
-void
-AMQP_CALL amqp_maybe_release_buffers_on_channel(amqp_connection_state_t state, amqp_channel_t channel);
-
 AMQP_PUBLIC_FUNCTION
 int
 AMQP_CALL amqp_send_frame(amqp_connection_state_t state, amqp_frame_t const *frame);
