@@ -28,7 +28,7 @@ int main(int argc, const char* argv[])
 
   amqp_login(conn, info.vhost, AMQP_DEFAULT_MAX_CHANNELS, AMQP_DEFAULT_FRAME_SIZE, AMQP_DEFAULT_HEARTBEAT, AMQP_SASL_METHOD_PLAIN, info.user, info.password);
 
-  amqp_connection_close(conn, AMQP_REPLY_TYPE_SUCCESS);
+  amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
   amqp_destroy_connection(conn);
 }
 
