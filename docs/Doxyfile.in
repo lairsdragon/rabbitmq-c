@@ -1,4 +1,4 @@
-# Doxyfile 1.8.2
+# Doxyfile 1.8.4
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -44,7 +44,6 @@ SUBGROUPING            = YES
 INLINE_GROUPED_CLASSES = NO
 INLINE_SIMPLE_STRUCTS  = NO
 TYPEDEF_HIDES_STRUCT   = YES
-SYMBOL_CACHE_SIZE      = 0
 LOOKUP_CACHE_SIZE      = 0
 #---------------------------------------------------------------------------
 # Build related configuration options
@@ -97,11 +96,12 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/librabbitmq \
-                         @CMAKE_CURRENT_SOURCE_DIR@/docs \
-                         @CMAKE_CURRENT_BINARY_DIR@/librabbitmq
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/README.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/librabbitmq \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.h *.md
+FILE_PATTERNS          = *.h \
+                         *.md
 RECURSIVE              = NO
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
@@ -110,13 +110,15 @@ EXCLUDE_PATTERNS       = amqp_private.h \
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@ \
                          @CMAKE_CURRENT_SOURCE_DIR@/examples
-EXAMPLE_PATTERNS       = *.c *.md
+EXAMPLE_PATTERNS       = *.c \
+                         *.md
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             =
 INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
+USE_MDFILE_AS_MAINPAGE = README.md
 #---------------------------------------------------------------------------
 # configuration options related to source browsing
 #---------------------------------------------------------------------------
@@ -181,10 +183,17 @@ EXT_LINKS_IN_WINDOW    = NO
 FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
 USE_MATHJAX            = NO
+MATHJAX_FORMAT         = HTML-CSS
 MATHJAX_RELPATH        = http://www.mathjax.org/mathjax
 MATHJAX_EXTENSIONS     =
+MATHJAX_CODEFILE       =
 SEARCHENGINE           = YES
 SERVER_BASED_SEARCH    = NO
+EXTERNAL_SEARCH        = NO
+SEARCHENGINE_URL       =
+SEARCHDATA_FILE        = searchdata.xml
+EXTERNAL_SEARCH_ID     =
+EXTRA_SEARCH_MAPPINGS  =
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
@@ -197,6 +206,7 @@ PAPER_TYPE             = a4
 EXTRA_PACKAGES         =
 LATEX_HEADER           =
 LATEX_FOOTER           =
+LATEX_EXTRA_FILES      =
 PDF_HYPERLINKS         = YES
 USE_PDFLATEX           = YES
 LATEX_BATCHMODE        = NO
@@ -228,6 +238,11 @@ XML_SCHEMA             =
 XML_DTD                =
 XML_PROGRAMLISTING     = YES
 #---------------------------------------------------------------------------
+# configuration options related to the DOCBOOK output
+#---------------------------------------------------------------------------
+GENERATE_DOCBOOK       = NO
+DOCBOOK_OUTPUT         = docbook
+#---------------------------------------------------------------------------
 # configuration options for the AutoGen Definitions output
 #---------------------------------------------------------------------------
 GENERATE_AUTOGEN_DEF   = NO
@@ -248,7 +263,12 @@ SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/librabbitmq \
                          @CMAKE_CURRENT_BINARY_DIR@/librabbitmq
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             =
+PREDEFINED             = AMQP_BEGIN_DECLS= \
+                         AMQP_END_DECLS= \
+                         AMQP_PUBLIC_FUNCTION= \
+                         AMQP_PUBLIC_VARIABLE= \
+                         AMQP_CALL= \
+                         AMQP_DEPRECATED(x)=x
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
@@ -258,6 +278,7 @@ TAGFILES               =
 GENERATE_TAGFILE       =
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
+EXTERNAL_PAGES         = YES
 PERL_PATH              = /usr/bin/perl
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool

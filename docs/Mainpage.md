@@ -1,2 +1,0 @@
-@mainpage
-@include README.md

@@ -1,5 +1,5 @@
 /* vim:set ft=c ts=2 sw=2 sts=2 et cindent: */
-/** @file */
+/** \file */
 /*
  * ***** BEGIN LICENSE BLOCK *****
  * Version: MIT
@@ -38,19 +38,20 @@
 #ifndef AMQP_H
 #define AMQP_H
 
+/** \cond HIDE_FROM_DOXYGEN */
+
 #ifdef __cplusplus
 #define AMQP_BEGIN_DECLS extern "C" {
 #define AMQP_END_DECLS }
 #else
-/** @cond Hide from Doxygen */
 #define AMQP_BEGIN_DECLS
 #define AMQP_END_DECLS
-/** @endcond */
 #endif
 
 
-/**
- * @internal
+
+/*
+ * \internal
  * Important API decorators:
  *  AMQP_PUBLIC_FUNCTION - a public API function
  *  AMQP_PUBLIC_VARIABLE - a public API external variable
@@ -121,11 +122,9 @@
   __attribute__ ((visibility ("default"))) extern
 # define AMQP_CALL
 #else
-/** @cond Hide from Doxygen */
 # define AMQP_PUBLIC_FUNCTION
 # define AMQP_PUBLIC_VARIABLE extern
 # define AMQP_CALL
-/** @endcond */
 #endif
 
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
@@ -157,6 +156,8 @@ typedef _W64 int ssize_t;
 #endif
 #endif
 
+/** \endcond */
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -165,63 +166,110 @@ struct timeval;
 AMQP_BEGIN_DECLS
 
 /**
- * @def AMQP_VERSION_MAJOR major version number constant
+ * \def AMQP_VERSION_MAJOR
+ *
+ * Major library version number compile-time constant
  *
  * The major version is incremented when backwards incompatible API changes
  * are made.
+ *
+ * \sa AMQP_VERSION, AMQP_VERSION_STRING
+ *
+ * \since v0.4.0
  */
+
 /**
- * @ def AMQP_VERSION_MINOR minor version number constant
+ * \def AMQP_VERSION_MINOR
+ *
+ * Minor library version number compile-time constant
  *
  * The minor version is incremented when new APIs are added. Existing APIs
  * are left alone.
+ *
+ * \sa AMQP_VERSION, AMQP_VERSION_STRING
+ *
+ * \since v0.4.0
  */
+
 /**
- * @def AMQP_VERSION_PATCH patch version number constant
+ * \def AMQP_VERSION_PATCH
+ *
+ * Patch library version number compile-time constant
  *
  * The patch version is incremented when library code changes, but the API
  * is not changed.
+ *
+ * \sa AMQP_VERSION, AMQP_VERSION_STRING
+ *
+ * \since v0.4.0
  */
+
 /**
- * @def AMQP_VERSION_IS_RELEASE constant set to 1 for tagged release, 0 otherwise
+ * \def AMQP_VERSION_IS_RELEASE
+ *
+ * Version constant set to 1 for tagged release, 0 otherwise
  *
  * NOTE: versions that are not tagged releases are not guaranteed to be API/ABI
  * compatible with older releases, and may change commit-to-commit.
+ *
+ * \sa AMQP_VERSION, AMQP_VERSION_STRING
+ *
+ * \since v0.4.0
  */
 /*
  * Developer note: when changing these, be sure to update SOVERSION constants
  *  in CMakeLists.txt and configure.ac
  */
+
 #define AMQP_VERSION_MAJOR 0
 #define AMQP_VERSION_MINOR 4
 #define AMQP_VERSION_PATCH 0
 #define AMQP_VERSION_IS_RELEASE 0
 
+
 /**
- * @def AMQP_VERSION is a packed version number
+ * \def AMQP_VERSION
  *
- * AMQP_VERSION is a 4-byte unsigned integer with the high byte set to the
- * major version, next byte set to the minor version, the next byte the patch
- * version, and the lowest byte set to 1 for released versions, 0 otherwise.
+ * Packed version number
  *
- * Version 2.3.4 which is released version would be encoded as 0x02030401
+ * AMQP_VERSION is a 4-byte unsigned integer with the most significant byte
+ * set to AMQP_VERSION_MAJOR, the second most significant byte set to
+ * AMQP_VERSION_MINOR, third most significant byte set to AMQP_VERSION_PATCH,
+ * and the lowest byte set to AMQP_VERSION_IS_RELEASE.
+ *
+ * For example version 2.3.4 which is released version would be encoded as
+ * 0x02030401
+ *
+ * \sa amqp_version_number() AMQP_VERSION_MAJOR, AMQP_VERSION_MINOR,
+ *     AMQP_VERSION_PATCH, AMQP_VERSION_IS_RELEASE
+ *
+ * \since v0.4.0
  */
 #define AMQP_VERSION ((AMQP_VERSION_MAJOR << 24) | \
                       (AMQP_VERSION_MINOR << 16) | \
                       (AMQP_VERSION_PATCH << 8)  | \
                       (AMQP_VERSION_IS_RELEASE))
 
+/** \cond HIDE_FROM_DOXYGEN */
 #define AMQ_STRINGIFY(s) AMQ_STRINGIFY_HELPER(s)
 #define AMQ_STRINGIFY_HELPER(s) #s
 
 #define AMQ_VERSION_STRING  AMQ_STRINGIFY(AMQP_VERSION_MAJOR) "." \
                             AMQ_STRINGIFY(AMQP_VERSION_MINOR) "." \
                             AMQ_STRINGIFY(AMQP_VERSION_PATCH)
+/** \endcond */
 
 /**
- * @def AMQP_VERSION_STRING is a string representation of AMQP_VERSION.
+ * \def AMQP_VERSION_STRING
+ *
+ * Version string compile-time constant
+ *
  * Non-released versions of the library will have "-pre" appended to the
  * version string
+ *
+ * \sa amqp_version()
+ *
+ * \since v0.4.0
  */
 #if AMQP_VERSION_IS_RELEASE
 # define AMQP_VERSION_STRING AMQ_VERSION_STRING
@@ -235,7 +283,11 @@ AMQP_BEGIN_DECLS
  *
  * See \ref AMQP_VERSION
  *
- * @return packed 32-bit integer representing version of library at runtime
+ * \return packed 32-bit integer representing version of library at runtime
+ *
+ * \sa AMQP_VERSION, amqp_version()
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 uint32_t
@@ -246,57 +298,91 @@ AMQP_CALL amqp_version_number(void);
  *
  * See \ref AMQP_VERSION_STRING
  *
- * @return a statically allocated string describing the version of rabbitmq-c.
+ * \return a statically allocated string describing the version of rabbitmq-c.
+ *
+ * \sa amqp_version_number(), AMQP_VERSION_STRING, AMQP_VERSION
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 char const *
 AMQP_CALL amqp_version(void);
 
 /**
- * Default frame size
+ * \def AMQP_DEFAULT_FRAME_SIZE
+ *
+ * Default frame size (128Kb)
+ *
+ * \sa amqp_login(), amqp_login_with_properties()
+ *
+ * \since v0.4.0
  */
 #define AMQP_DEFAULT_FRAME_SIZE 131072
 
 /**
- * Default maximum number of channels.
+ * \def AMQP_DEFAULT_MAX_CHANNELS
+ *
+ * Default maximum number of channels (0, no limit)
+ *
+ * \sa amqp_login(), amqp_login_with_properties()
+ *
+ * \since v0.4.0
  */
 #define AMQP_DEFAULT_MAX_CHANNELS 0
 
 /**
- * Default heartbeat
+ * \def AMQP_DEFAULT_HEARTBEAT
+ *
+ * Default heartbeat interval (0, heartbeat disabled)
+ *
+ * \sa amqp_login(), amqp_login_with_properties()
+ *
+ * \since v0.4.0
  */
 #define AMQP_DEFAULT_HEARTBEAT 0
 
 /**
  * boolean type 0 = false, true otherwise
+ *
+ * \since v0.1
  */
 typedef int amqp_boolean_t;
 
 /**
  * Method number
+ *
+ * \since v0.1
  */
 typedef uint32_t amqp_method_number_t;
 
 /**
  * Bitmask for flags
+ *
+ * \since v0.1
  */
 typedef uint32_t amqp_flags_t;
 
 /**
  * Channel type
+ *
+ * \since v0.1
  */
 typedef uint16_t amqp_channel_t;
 
 /**
- * Structure for holding a buffer and its size
+ * Buffer descriptor
+ *
+ * \since v0.1
  */
 typedef struct amqp_bytes_t_ {
-  size_t len;   /**< length of the buffer */
-  void *bytes;  /**< pointer to the buffer data */
+  size_t len;   /**< length of the buffer in bytes */
+  void *bytes;  /**< pointer to the beginning of the buffer */
 } amqp_bytes_t;
 
 /**
- * For holding a decimal value
+ * Decimal data type
+ *
+ * \since v0.1
  */
 typedef struct amqp_decimal_t_ {
   uint8_t decimals;   /**< the location of the decimal point */
@@ -304,21 +390,28 @@ typedef struct amqp_decimal_t_ {
 } amqp_decimal_t;
 
 /**
- * An AMQP Field Table
+ * AMQP field table
  *
- * An amqp field table is a set of key-value pairs.
- *  Key are up to 128-byte UTF-8 character strings
- *  Values can of one or more types
+ * An AMQP field table is a set of key-value pairs.
+ * A key is a UTF-8 encoded string up to 128 bytes long, and are not null
+ * terminated.
+ * A value can be one of several different datatypes. \sa amqp_field_value_kind_t
+ *
+ * \sa amqp_table_entry_t
+ *
+ * \since v0.1
  */
 typedef struct amqp_table_t_ {
-  int num_entries;                      /**< number of entries in the table */
-  struct amqp_table_entry_t_ *entries;  /**< linked list of entries */
+  int num_entries;                      /**< length of entries array */
+  struct amqp_table_entry_t_ *entries;  /**< an array of table entries */
 } amqp_table_t;
 
 /**
  * An AMQP Field Array
  *
  * A repeated set of field values, all must be of the same type
+ *
+ * \since v0.1
  */
 typedef struct amqp_array_t_ {
   int num_entries;                      /**< Number of entries in the table */
@@ -366,6 +459,8 @@ the code.
 
 /**
  * A field table value
+ *
+ * \since v0.1
  */
 typedef struct amqp_field_value_t_ {
   uint8_t kind;             /**< the type of the entry /sa amqp_field_value_kind_t */
@@ -390,6 +485,10 @@ typedef struct amqp_field_value_t_ {
 
 /**
  * An entry in a field-table
+ *
+ * \sa amqp_table_encode(), amqp_table_decode(), amqp_table_clone()
+ *
+ * \since v0.1
  */
 typedef struct amqp_table_entry_t_ {
   amqp_bytes_t key;           /**< the table entry key. Its a null-terminated UTF-8 string,
@@ -399,6 +498,8 @@ typedef struct amqp_table_entry_t_ {
 
 /**
  * Field value types
+ *
+ * \since v0.1
  */
 typedef enum {
   AMQP_FIELD_KIND_BOOLEAN = 't',  /**< boolean type. 0 = false, 1 = true @see amqp_boolean_t */
@@ -423,6 +524,8 @@ typedef enum {
 
 /**
  * A list of allocation blocks
+ *
+ * \since v0.1
  */
 typedef struct amqp_pool_blocklist_t_ {
   int num_blocks;     /**< Number of blocks in the block list */
@@ -431,6 +534,8 @@ typedef struct amqp_pool_blocklist_t_ {
 
 /**
  * A memory pool
+ *
+ * \since v0.1
  */
 typedef struct amqp_pool_t_ {
   size_t pagesize;            /**< the size of the page in bytes.
@@ -449,6 +554,8 @@ typedef struct amqp_pool_t_ {
 
 /**
  * An amqp method
+ *
+ * \since v0.1
  */
 typedef struct amqp_method_t_ {
   amqp_method_number_t id;      /**< the method id number */
@@ -458,6 +565,8 @@ typedef struct amqp_method_t_ {
 
 /**
  * An AMQP frame
+ *
+ * \since v0.1
  */
 typedef struct amqp_frame_t_ {
   uint8_t frame_type;       /**< frame type. The types:
@@ -488,6 +597,8 @@ typedef struct amqp_frame_t_ {
 
 /**
  * Response type
+ *
+ * \since v0.1
  */
 typedef enum amqp_response_type_enum_ {
   AMQP_RESPONSE_NONE = 0,         /**< the library got an EOF from the socket */
@@ -498,6 +609,8 @@ typedef enum amqp_response_type_enum_ {
 
 /**
  * Reply from a RPC method on the broker
+ *
+ * \since v0.1
  */
 typedef struct amqp_rpc_reply_t_ {
   amqp_response_type_enum reply_type;   /**< the reply type:
@@ -516,6 +629,8 @@ typedef struct amqp_rpc_reply_t_ {
 
 /**
  * SASL method type
+ *
+ * \since v0.1
  */
 typedef enum amqp_sasl_method_enum_ {
   AMQP_SASL_METHOD_PLAIN = 0      /**< the PLAIN SASL method for authentication to the broker */
@@ -523,15 +638,29 @@ typedef enum amqp_sasl_method_enum_ {
 
 /**
  * connection state object
+ *
+ * \since v0.1
  */
 typedef struct amqp_connection_state_t_ *amqp_connection_state_t;
 
+/**
+ * Socket object
+ *
+ * \since v0.4.0
+ */
 typedef struct amqp_socket_t_ amqp_socket_t;
 
+/**
+ * Status codes
+ *
+ * \since v0.4.0
+ */
 typedef enum amqp_status_enum_
 {
-  AMQP_STATUS_OK =                         0x0,
-  AMQP_STATUS_NO_MEMORY =                 -0x0001,
+  AMQP_STATUS_OK =                         0x0,     /**< The operation was
+                                                      successful */
+  AMQP_STATUS_NO_MEMORY =                 -0x0001,  /**< Memory allocation
+                                                      failed */
   AMQP_STATUS_BAD_AMQP_DATA =             -0x0002,
   AMQP_STATUS_UNKNOWN_CLASS =             -0x0003,
   AMQP_STATUS_UNKNOWN_METHOD =            -0x0004,
@@ -564,51 +693,82 @@ AMQP_END_DECLS
 AMQP_BEGIN_DECLS
 
 /**
- * Gets the version string of the rabbitmq-c library
- *
- * @return string representation of the library version.
- *         Statically allocated, does not need to be freed.
- */
-AMQP_PUBLIC_FUNCTION
-char const *
-AMQP_CALL amqp_version(void);
-
-/**
  * Empty bytes structure
+ *
+ * \since v0.2
  */
 AMQP_PUBLIC_VARIABLE const amqp_bytes_t amqp_empty_bytes;
 
 /**
  * Empty table structure
+ *
+ * \since v0.2
  */
 AMQP_PUBLIC_VARIABLE const amqp_table_t amqp_empty_table;
 
 /**
  * Empty table array structure
+ *
+ * \since v0.2
  */
 AMQP_PUBLIC_VARIABLE const amqp_array_t amqp_empty_array;
 
 /* Compatibility macros for the above, to avoid the need to update
    code written against earlier versions of librabbitmq. */
-#define AMQP_EMPTY_BYTES amqp_empty_bytes   /**< @deprecated use amqp_empty_bytes instead. */
-#define AMQP_EMPTY_TABLE amqp_empty_table   /**< @deprecated use amqp_emtpy_table instead. */
-#define AMQP_EMPTY_ARRAY amqp_empty_array   /**< @deprecated use amqp_empty_array instead. */
 
 /**
- * Initializes an amqp_pool_t memory allocation pool
+ * \def AMQP_EMPTY_BYTES
+ *
+ * Deprecated, use \ref amqp_empty_bytes instead
+ *
+ * \deprecated use \ref amqp_empty_bytes instead
+ *
+ * \since v0.1
+ */
+#define AMQP_EMPTY_BYTES amqp_empty_bytes
+
+/**
+ * \def AMQP_EMPTY_TABLE
+ *
+ * Deprecated, use \ref amqp_empty_table instead
+ *
+ * \deprecated use \ref amqp_empty_table instead
+ *
+ * \since v0.1
+ */
+#define AMQP_EMPTY_TABLE amqp_empty_table
+
+/**
+ * \def AMQP_EMPTY_ARRAY
+ *
+ * Deprecated, use \ref amqp_empty_array instead
+ *
+ * \deprecated use \ref amqp_empty_array instead
+ *
+ * \since v0.1
+ */
+#define AMQP_EMPTY_ARRAY amqp_empty_array
+
+/**
+ * Initializes an amqp_pool_t memory allocation pool for use
  *
  * Readies an allocation pool for use. An amqp_pool_t
  * must be initialized before use
  *
- * @param [in] pool the amqp_pool_t structure to initialize.
+ * \param [in] pool the amqp_pool_t structure to initialize.
  *              Calling this function on a pool a pool that has
  *              already been initialized will result in undefined
  *              behavior
- * @param [in] pagesize the unit size that the pool will allocate
+ * \param [in] pagesize the unit size that the pool will allocate
  *              memory chunks in. Anything allocated against the pool
  *              with a requested size will be carved out of a block
  *              this size. Allocations larger than this will be
  *              allocated individually
+ *
+ * \sa recycle_amqp_pool(), empty_amqp_pool(), amqp_pool_alloc(),
+ *     amqp_pool_alloc_bytes(), amqp_pool_t
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -619,25 +779,33 @@ AMQP_CALL init_amqp_pool(amqp_pool_t *pool, size_t pagesize);
  *
  * Recycles the space allocate by the pool
  *
- * This invalidates all allocations made against the pool
- * before the call was made. Use of those pointers will
- * have undefined behavior.
+ * This invalidates all allocations made against the pool before this call is
+ * made, any use of any allocations made before recycle_amqp_pool() is called
+ * will result in undefined behavior.
  *
- * Note: this may or may not release memory, if you're looking
- * to free memory try using empty_amqp_pool
+ * Note: this may or may not release memory, to force memory to be released
+ * call empty_amqp_pool().
  *
- * @param [in] pool the amqp_pool_t to recycle
+ * \param [in] pool the amqp_pool_t to recycle
+ *
+ * \sa recycle_amqp_pool(), empty_amqp_pool(), amqp_pool_alloc(),
+ *      amqp_pool_alloc_bytes()
+ *
+ * \since v0.1
+ *
  */
 AMQP_PUBLIC_FUNCTION
 void
 AMQP_CALL recycle_amqp_pool(amqp_pool_t *pool);
 
 /**
- * Empties an amqp memory pool, f
+ * Empties an amqp memory pool
  *
- * This is a frees all memory associated with an amqp_pool_t
+ * Releases all memory associated with an allocation pool
  *
- * @param [in] pool the amqp_pool_t to empty
+ * \param [in] pool the amqp_pool_t to empty
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -646,10 +814,18 @@ AMQP_CALL empty_amqp_pool(amqp_pool_t *pool);
 /**
  * Allocates a block of memory from an amqp_pool_t memory pool
  *
- * @param [in] pool the allocation pool to allocate the memory from
- * @param [in] amount the size of the allocation in bytes
- * @return a pointer to the memory block, or NULL if the allocation cannot
- *          be satisified
+ * Memory will be aligned on a 8-byte boundary. If a 0-length allocation is
+ * requested, a NULL pointer will be returned.
+ *
+ * \param [in] pool the allocation pool to allocate the memory from
+ * \param [in] amount the size of the allocation in bytes.
+ * \return a pointer to the memory block, or NULL if the allocation cannot
+ *          be satisfied.
+ *
+ * \sa init_amqp_pool(), recycle_amqp_pool(), empty_amqp_pool(),
+ *     amqp_pool_alloc_bytes()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void *
@@ -658,13 +834,21 @@ AMQP_CALL amqp_pool_alloc(amqp_pool_t *pool, size_t amount);
 /**
  * Allocates a block of memory from an amqp_pool_t to an amqp_bytes_t
  *
- * @param [in] pool the allocation pool to allocate the memory from
- * @param [in] amount the size of the allocation in bytes
- * @param [in] output the location to store the pointer. On success
+ * Memory will be aligned on a 8-byte boundary. If a 0-length allocation is
+ * requested, output.bytes = NULL.
+ *
+ * \param [in] pool the allocation pool to allocate the memory from
+ * \param [in] amount the size of the allocation in bytes
+ * \param [in] output the location to store the pointer. On success
  *              output.bytes will be set to the beginning of the buffer
  *              output.len will be set to amount
  *              On error output.bytes will be set to NULL and output.len
  *              set to 0
+ *
+ * \sa init_amqp_pool(), recycle_amqp_pool(), empty_amqp_pool(),
+ *     amqp_pool_alloc()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -683,8 +867,10 @@ AMQP_CALL amqp_pool_alloc_bytes(amqp_pool_t *pool, size_t amount, amqp_bytes_t *
  * This function uses strlen() internally so cstr must be properly
  * terminated
  *
- * @param [in] cstr the c string to wrap
- * @return an amqp_bytes_t that describes the string
+ * \param [in] cstr the c string to wrap
+ * \return an amqp_bytes_t that describes the string
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_bytes_t
@@ -696,11 +882,15 @@ AMQP_CALL amqp_cstring_bytes(char const *cstr);
  * The buffer is cloned and the contents copied.
  *
  * The memory associated with the output is allocated
- * with amqp_bytes_malloc and should be freed with
- * amqp_bytes_free
+ * with amqp_bytes_malloc() and should be freed with
+ * amqp_bytes_free()
  *
- * @param [in] src
- * @return a clone of the src
+ * \param [in] src
+ * \return a clone of the src
+ *
+ * \sa amqp_bytes_free(), amqp_bytes_malloc()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_bytes_t
@@ -709,11 +899,16 @@ AMQP_CALL amqp_bytes_malloc_dup(amqp_bytes_t src);
 /**
  * Allocates a amqp_bytes_t buffer
  *
- * Creates an amqp_bytes_t buffer of the specified amount
+ * Creates an amqp_bytes_t buffer of the specified amount, the buffer should be
+ * freed using amqp_bytes_free()
  *
- * @param [in] amount the size of the buffer in bytes
- * @returns an amqp_bytes_t with amount bytes allocated.
+ * \param [in] amount the size of the buffer in bytes
+ * \returns an amqp_bytes_t with amount bytes allocated.
  *           output.bytes will be set to NULL on error
+ *
+ * \sa amqp_bytes_free(), amqp_bytes_malloc_dup()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_bytes_t
@@ -722,12 +917,16 @@ AMQP_CALL amqp_bytes_malloc(size_t amount);
 /**
  * Frees an amqp_bytes_t buffer
  *
- * Frees a buffer allocated with amqp_bytes_malloc or amqp_bytes_malloc_dup
+ * Frees a buffer allocated with amqp_bytes_malloc() or amqp_bytes_malloc_dup()
  *
  * Calling amqp_bytes_free on buffers not allocated with one
  * of those two functions will result in undefined behavior
  *
- * @param [in] bytes the buffer to free
+ * \param [in] bytes the buffer to free
+ *
+ * \sa amqp_bytes_malloc(), amqp_bytes_malloc_dup()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -738,17 +937,24 @@ AMQP_CALL amqp_bytes_free(amqp_bytes_t bytes);
  *
  * amqp_connection_state_t objects created with this function
  * should be freed with amqp_destroy_connection
+ *
+ * \sa amqp_destroy_connection()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_connection_state_t
 AMQP_CALL amqp_new_connection(void);
 
 /**
- * Gets the sockfd associated with the connection
+ * Get the underlying socket descriptor for the connection
  *
- * @param [in] state the connection object
- * @returns the sockfd associated with the connection, > 0 if
- *           the sockfd has not been set
+ * \param [in] state the connection object
+ * \returns the socket descriptor if one has been set, -1 otherwise
+ *
+ * \sa amqp_tcp_socket_new(), amqp_ssl_socket_new(), amqp_socket_open()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -756,10 +962,21 @@ AMQP_CALL amqp_get_sockfd(amqp_connection_state_t state);
 
 
 /**
- * Sets the sockfd associated with the connection
+ * Deprecated, use amqp_tcp_socket_new() or amqp_ssl_socket_new()
  *
- * @param [in] state the connection object
- * @param [in] sockfd the socket
+ * \deprecated Use amqp_tcp_socket_new() or amqp_ssl_socket_new()
+ *
+ * Sets the socket descriptor associated with the connection. The socket
+ * should be connected to a broker, and should not be read to or written from
+ * before calling this function.  A socket descriptor can be created and opened
+ * using amqp_open_socket()
+ *
+ * \param [in] state the connection object
+ * \param [in] sockfd the socket
+ *
+ * \sa amqp_open_socket(), amqp_tcp_socket_new(), amqp_ssl_socket_new()
+ *
+ * \since v0.1
  */
 AMQP_DEPRECATED(
   AMQP_PUBLIC_FUNCTION
@@ -769,21 +986,32 @@ AMQP_DEPRECATED(
 
 
 /**
- * Tune various client-side connection parameters
+ * Tune client side parameters
  *
- * @param [in] state the connection object
- * @param [in] channel_max the maximum number of channels.
+ * \warning This function may call abort() if the connection is in a certain
+ *  state. As such it should probably not be called code outside the library.
+ *  connection parameters should be specified when calling amqp_login() or
+ *  amqp_login_with_properties()
+ *
+ * This function changes channel_max, frame_max, and heartbeat parameters, on
+ * the client side only. It does not try to renegotiate these parameters with
+ * the broker. Using this function will lead to unexpected results.
+ *
+ * \param [in] state the connection object
+ * \param [in] channel_max the maximum number of channels.
  *              The largest this can be is 65535
- * @param [in] frame_max the maximum size of an frame.
+ * \param [in] frame_max the maximum size of an frame.
  *              The smallest this can be is 4096
  *              The largest this can be is 2147483647
  *              Unless you know what you're doing the recommended
- *              size is 131072
- * @param [in] heartbeat the number of seconds between heartbeats
- *              NOTE: rabbitmq-c does not support heartbeats,
- *              setting this will not have any effect
+ *              size is 131072 or 128KB
+ * \param [in] heartbeat the number of seconds between heartbeats
  *
- * @return 0 on success, anything else indicates error
+ * \return AMQP_STATUS_OK on success, amqp_status_enum value otherwise
+ *
+ * \sa amqp_login(), amqp_login_with_properties()
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -797,8 +1025,10 @@ AMQP_CALL amqp_tune_connection(amqp_connection_state_t state,
  *
  * This number can be changed using the amqp_tune_connection function
  *
- * @param [in] state the connection object
- * @return the maximum number of channels. 0 if there is no limit
+ * \param [in] state the connection object
+ * \return the maximum number of channels. 0 if there is no limit
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -811,7 +1041,9 @@ AMQP_CALL amqp_get_channel_max(amqp_connection_state_t state);
  * This function will free all memory and close any sockets
  * associated with the connection
  *
- * @param [in] state the connection object
+ * \param [in] state the connection object
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -823,10 +1055,12 @@ AMQP_CALL amqp_destroy_connection(amqp_connection_state_t state);
  * For a given input buffer and connection state potentially decode
  * a frame from it
  *
- * @param [in] state the connection object
- * @param [in] received_data a buffer of the data to be decoded
- * @param [in] decoded_frame the frame
- * @return 0 on success, 0 > on error
+ * \param [in] state the connection object
+ * \param [in] received_data a buffer of the data to be decoded
+ * \param [in] decoded_frame the frame
+ * \return 0 on success, 0 > on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -841,8 +1075,10 @@ AMQP_CALL amqp_handle_input(amqp_connection_state_t state,
  *
  * Alternatively call amqp_maybe_release_buffers to do this all in one step
  *
- * @param [in] state the connection object
- * @returns TRUE if the buffers can be released FALSE otherwise
+ * \param [in] state the connection object
+ * \returns TRUE if the buffers can be released FALSE otherwise
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_boolean_t
@@ -855,7 +1091,9 @@ AMQP_CALL amqp_release_buffers_ok(amqp_connection_state_t state);
  * the connection is in a state that it can release the buffers.
  * failing to do this will cause the program to abort.
  *
- * @param [in] state the connection object
+ * \param [in] state the connection object
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -866,7 +1104,9 @@ AMQP_CALL amqp_release_buffers(amqp_connection_state_t state);
  *
  * Releases interal connection buffers if it is possible
  *
- * @param [in] state the connection object
+ * \param [in] state the connection object
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -874,8 +1114,10 @@ AMQP_CALL amqp_maybe_release_buffers(amqp_connection_state_t state);
 
 /**
  *
- * @param [in] state
- * @param [in] channel
+ * \param [in] state
+ * \param [in] channel
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -884,9 +1126,11 @@ AMQP_CALL amqp_maybe_release_buffers_on_channel(amqp_connection_state_t state, a
 /**
  * Send a frame to the broker
  *
- * @param [in] state the connection object
- * @param [in] frame the frame to send to the broker
- * @return 0 on success, 0 > on error
+ * \param [in] state the connection object
+ * \param [in] frame the frame to send to the broker
+ * \return 0 on success, 0 > on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -897,9 +1141,11 @@ AMQP_CALL amqp_send_frame(amqp_connection_state_t state, amqp_frame_t const *fra
  *
  * Works just like strcmp(), comparing two the table keys, datatype, then values
  *
- * @param [in] entry1 the entry on the left
- * @param [in] entry2 the entry on the right
- * @return 0 if entries are equal, 0 < if left is greater, 0 > if right is greater
+ * \param [in] entry1 the entry on the left
+ * \param [in] entry2 the entry on the right
+ * \return 0 if entries are equal, 0 < if left is greater, 0 > if right is greater
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -910,11 +1156,13 @@ AMQP_CALL amqp_table_entry_cmp(void const *entry1, void const *entry2);
  *
  * Attempts to open a socket to hostname on portnumber
  *
- * @param [in] hostname this can be a hostname or IP address.
+ * \param [in] hostname this can be a hostname or IP address.
  *              Both IPv4 and IPv6 are acceptable
- * @param [in] portnumber the port to connect on. RabbitMQ brokers
+ * \param [in] portnumber the port to connect on. RabbitMQ brokers
  *              listen on port 5672, and 5671 for SSL
- * @return the sockfd, or 0 > on error
+ * \return the sockfd, or 0 > on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -923,8 +1171,10 @@ AMQP_CALL amqp_open_socket(char const *hostname, int portnumber);
 /**
  * Send AMQP handshake to broker
  *
- * @param [in] state the connection object
- * @return -1 on error, a positive value on success
+ * \param [in] state the connection object
+ * \return -1 on error, a positive value on success
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -936,8 +1186,10 @@ AMQP_CALL amqp_send_header(amqp_connection_state_t state);
  * If this function returns true, amqp_simple_wait_method will
  * return a new frame without potentially entering a blocking read()
  *
- * @param [in] state the connection object
- * @return TRUE if there are frames enqueued, FALSE otherwise
+ * \param [in] state the connection object
+ * \return TRUE if there are frames enqueued, FALSE otherwise
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_boolean_t
@@ -946,14 +1198,34 @@ AMQP_CALL amqp_frames_enqueued(amqp_connection_state_t state);
 /**
  * Waits for a single frame from the broker
  *
- * @param [in] state the connection object
- * @param [out] decoded_frame the frame
- * @return 0 on success, 0 > on error
+ * \param [in] state the connection object
+ * \param [out] decoded_frame the frame
+ * \return 0 on success, 0 > on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
 AMQP_CALL amqp_simple_wait_frame(amqp_connection_state_t state,
                                  amqp_frame_t *decoded_frame);
+
+/**
+ * Wait for a frame with a timeout
+ *
+ * \param [in,out] state
+ * \param [out] decoded_frame
+ * \param [in] tv
+ * \return
+ *
+ * \sa amqp_simple_wait_frame()
+ *
+ * \since v0.4.0
+ */
+AMQP_PUBLIC_FUNCTION
+int
+AMQP_CALL amqp_simple_wait_frame_noblock(amqp_connection_state_t state,
+                                         amqp_frame_t *decoded_frame,
+                                         struct timeval *tv);
 
 /**
  * Waits for a specific method from the broker
@@ -962,17 +1234,14 @@ AMQP_CALL amqp_simple_wait_frame(amqp_connection_state_t state,
  * If a frame is received that does not match expected_channel
  * or expected_method the program will abort
  *
- * @param [in] state the connection object
- * @param [in] expected_channel the channel that the method should be delivered on
- * @param [in] expected_method the method to wait for
- * @param [out] output the method
- * @returns 0 on success, 0 < on failure
+ * \param [in] state the connection object
+ * \param [in] expected_channel the channel that the method should be delivered on
+ * \param [in] expected_method the method to wait for
+ * \param [out] output the method
+ * \returns 0 on success, 0 < on failure
+ *
+ * \since v0.1
  */
-AMQP_PUBLIC_FUNCTION
-int
-AMQP_CALL amqp_simple_wait_frame_noblock(amqp_connection_state_t state,
-                                         amqp_frame_t *decoded_frame,
-                                         struct timeval *tv);
 
 AMQP_PUBLIC_FUNCTION
 int
@@ -984,11 +1253,13 @@ AMQP_CALL amqp_simple_wait_method(amqp_connection_state_t state,
 /**
  * Sends a method to the broker
  *
- * @param [in] state the connection object
- * @param [in] channel the channel object
- * @param [in] id the method number
- * @param [in] decoded the method object
- * @returns 0 on success, 0 < on failure
+ * \param [in] state the connection object
+ * \param [in] channel the channel object
+ * \param [in] id the method number
+ * \param [in] decoded the method object
+ * \returns 0 on success, 0 < on failure
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1000,12 +1271,14 @@ AMQP_CALL amqp_send_method(amqp_connection_state_t state,
 /**
  * Sends a method to the broker and waits for a method response
  *
- * @param [in] state the connection object
- * @param [in] channel the channel object
- * @param [in] request_id the method number of the request
- * @param [in] expected_reply_ids a 0 terminated array of expected response method numbers
- * @param [in] decoded_request_method the method to be sent to the broker
- * @return a amqp_rpc_reply_t which contains the broker response
+ * \param [in] state the connection object
+ * \param [in] channel the channel object
+ * \param [in] request_id the method number of the request
+ * \param [in] expected_reply_ids a 0 terminated array of expected response method numbers
+ * \param [in] decoded_request_method the method to be sent to the broker
+ * \return a amqp_rpc_reply_t which contains the broker response
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1016,14 +1289,16 @@ AMQP_CALL amqp_simple_rpc(amqp_connection_state_t state,
                           void *decoded_request_method);
 
 /**
- * Sends a method to the broker and waits for a method reponse
+ * Sends a method to the broker and waits for a method response
  *
- * @param [in] state the connection object
- * @param [in] channel the channel object
- * @param [in] request_id the method number of the request
- * @param [in] reply_id the method number expected in response
- * @param [in] decoded_request_method the request method
- * @return a pointer to the method, or NULL if an error occurs
+ * \param [in] state the connection object
+ * \param [in] channel the channel object
+ * \param [in] request_id the method number of the request
+ * \param [in] reply_id the method number expected in response
+ * \param [in] decoded_request_method the request method
+ * \return a pointer to the method, or NULL if an error occurs
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void *
@@ -1048,8 +1323,10 @@ AMQP_CALL amqp_simple_rpc_decoded(amqp_connection_state_t state,
  * generally do NOT update this per-connection-global amqp_rpc_reply_t
  * instance.
  *
- * @param [in] state the connection object
- * @return the most recent amqp_rpc_reply_t
+ * \param [in] state the connection object
+ * \return the most recent amqp_rpc_reply_t
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1061,25 +1338,27 @@ AMQP_CALL amqp_get_rpc_reply(amqp_connection_state_t state);
  * After using amqp_open_socket and amqp_set_sockfd, call
  * amqp_login to complete connecting to the broker
  *
- * @param [in] state the connection object
- * @param [in] vhost the virtual host on the broker. The default virtual
+ * \param [in] state the connection object
+ * \param [in] vhost the virtual host on the broker. The default virtual
  *              host on most brokers is "/"
- * @param [in] channel_max the maximum number of channels to request of
+ * \param [in] channel_max the maximum number of channels to request of
  *              the broker for this connection. 0 means no limit, this is a
  *              good default.
- * @param [in] frame_max the maximum size of an AMQP frame on the wire to
+ * \param [in] frame_max the maximum size of an AMQP frame on the wire to
  *              request of the broker for this connection. 4096 is the minimum
  *              size, 2^31-1 is the maximum, a good default is 131072 (128KB).
- * @param [in] heartbeat the number of seconds between heartbeat frames to
+ * \param [in] heartbeat the number of seconds between heartbeat frames to
  *              request of the broker. A value of 0 disables heartbeats.
  *              NOTE: rabbitmq-c does not support heartbeats, your best bet
  *              is to disable it by leaving this at 0
- * @param [in] sasl_method the SASL method to authenticate with the broker.
+ * \param [in] sasl_method the SASL method to authenticate with the broker.
  *              followed by the authentication information.
  *              For AMQP_SASL_METHOD_PLAIN, the AMQP_SASL_METHOD_PLAIN
  *              should be followed by two arguments in this order:
  *              const char* username, and const char* password.
- * @return amqp_rpc_reply_t indicating success or failure.
+ * \return amqp_rpc_reply_t indicating success or failure.
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1087,6 +1366,20 @@ AMQP_CALL amqp_login(amqp_connection_state_t state, char const *vhost,
                      int channel_max, int frame_max, int heartbeat,
                      amqp_sasl_method_enum sasl_method, ...);
 
+/**
+ * Login to the broker passing a properties table
+ *
+ * \param [in] state
+ * \param [in] vhost
+ * \param [in] channel_max
+ * \param [in] frame_max
+ * \param [in] heartbeat
+ * \param [in] properties
+ * \param [in] sasl_method
+ * \return val
+ *
+ * \since v0.4.0
+ */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
 AMQP_CALL amqp_login_with_properties(amqp_connection_state_t state, char const *vhost,
@@ -1098,22 +1391,24 @@ struct amqp_basic_properties_t_;
 /**
  * Publish a message to the broker
  *
- * @param [in] state the connection object
- * @param [in] channel the channel identifier
- * @param [in] exchange the exchange on the broker to publish to
- * @param [in] routing_key the routing key to use when publishing the message
- * @param [in] mandatory indicate to the broker that the message MUST be routed
+ * \param [in] state the connection object
+ * \param [in] channel the channel identifier
+ * \param [in] exchange the exchange on the broker to publish to
+ * \param [in] routing_key the routing key to use when publishing the message
+ * \param [in] mandatory indicate to the broker that the message MUST be routed
  *              to a queue. If the broker cannot do this it should respond with
  *              a basic.reject method.
- * @param [in] immediate indicate to the broker that the message MUST be delivered
+ * \param [in] immediate indicate to the broker that the message MUST be delivered
  *              to a consumer immediately. If the broker cannot do this it should
  *              response with a basic.reject method.
- * @param [in] properties the properties associated with the message
- * @param [in] body the message body
- * @return 0 on success, 0 > on failure to transmit the message to the broker.
+ * \param [in] properties the properties associated with the message
+ * \param [in] body the message body
+ * \return 0 on success, 0 > on failure to transmit the message to the broker.
  *          since basic.publish is an async method, this return value will not
  *          indicate whether the broker encountered an error, such as a non-existant
  *          exchange, or a failure in processing due to a mandatory or immediate flag.
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1126,10 +1421,12 @@ AMQP_CALL amqp_basic_publish(amqp_connection_state_t state, amqp_channel_t chann
 /**
  * Closes an channel
  *
- * @param [in] state the connection object
- * @param [in] channel the channel identifier
- * @param [in] code the reason for closing the channel, AMQP_REPLY_SUCCESS is a good default
- * @return amqp_rpc_reply_t indicating success or failure
+ * \param [in] state the connection object
+ * \param [in] channel the channel identifier
+ * \param [in] code the reason for closing the channel, AMQP_REPLY_SUCCESS is a good default
+ * \return amqp_rpc_reply_t indicating success or failure
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1143,9 +1440,11 @@ AMQP_CALL amqp_channel_close(amqp_connection_state_t state, amqp_channel_t chann
  * is being closed, after receiving acknowldgement from the broker it closes
  * the socket.
  *
- * @param [in] state the connection object
- * @param [in] code the reason code for closing the connection. AMQP_REPLY_SUCCESS is a good default.
- * @return amqp_rpc_reply_t indicating the result
+ * \param [in] state the connection object
+ * \param [in] code the reason code for closing the connection. AMQP_REPLY_SUCCESS is a good default.
+ * \return amqp_rpc_reply_t indicating the result
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1156,13 +1455,15 @@ AMQP_CALL amqp_connection_close(amqp_connection_state_t state, int code);
  *
  * Does a basic.ack on a received message
  *
- * @param [in] state the connection object
- * @param [in] channel the channel identifier
- * @param [in] delivery_tag the delivery take of the message to be ack'd
- * @param [in] multiple if true, ack all messages up to this delivery tag, if
+ * \param [in] state the connection object
+ * \param [in] channel the channel identifier
+ * \param [in] delivery_tag the delivery take of the message to be ack'd
+ * \param [in] multiple if true, ack all messages up to this delivery tag, if
  *              false ack only this delivery tag
- * @return 0 on success,  0 > on failing to send the ack to the broker.
+ * \return 0 on success,  0 > on failing to send the ack to the broker.
  *            this will not indicate failure if something goes wrong on the broker
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1175,13 +1476,15 @@ AMQP_CALL amqp_basic_ack(amqp_connection_state_t state, amqp_channel_t channel,
  * Synchonously polls the broker for a message in a queue, and
  * retrieves the message if a message is in the queue.
  *
- * @param [in] state the connection object
- * @param [in] channel the channel identifier to use
- * @param [in] queue the queue name to retrieve from
- * @param [in] no_ack if true the message is automatically ack'ed
+ * \param [in] state the connection object
+ * \param [in] channel the channel identifier to use
+ * \param [in] queue the queue name to retrieve from
+ * \param [in] no_ack if true the message is automatically ack'ed
  *              if false amqp_basic_ack should be called once the message
  *              retrieved has been processed
- * @return amqp_rpc_reply indicating success or failure
+ * \return amqp_rpc_reply indicating success or failure
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1193,13 +1496,15 @@ AMQP_CALL amqp_basic_get(amqp_connection_state_t state, amqp_channel_t channel,
  *
  * Actively reject a message that has been delivered
  *
- * @param [in] state the connection object
- * @param [in] channel the channel identifier
- * @param [in] delivery_tag the delivery tag of the message to reject
- * @param [in] requeue indicate to the broker whether it should requeue the
+ * \param [in] state the connection object
+ * \param [in] channel the channel identifier
+ * \param [in] delivery_tag the delivery tag of the message to reject
+ * \param [in] requeue indicate to the broker whether it should requeue the
  *              message or just discard it.
- * @return 0 on success, 0 > on failing to send the reject method to the broker.
+ * \return 0 on success, 0 > on failing to send the reject method to the broker.
  *          This will not indicate failure if something goes wrong on the broker.
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1213,8 +1518,10 @@ AMQP_CALL amqp_basic_reject(amqp_connection_state_t state, amqp_channel_t channe
  * calling amqp_simple_wait_frame will not immediately enter a
  * blocking read.
  *
- * @param [in] state the connection object
- * @return true if there is data in the recieve buffer, false otherwise
+ * \param [in] state the connection object
+ * \return true if there is data in the recieve buffer, false otherwise
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 amqp_boolean_t
@@ -1223,15 +1530,17 @@ AMQP_CALL amqp_data_in_buffer(amqp_connection_state_t state);
 /**
  * Get the error string for the given error code.
  *
- * @deprecated This function has been deprecated in favor of
+ * \deprecated This function has been deprecated in favor of
  *  \ref amqp_error_string2() which returns statically allocated
  *  string which do not need to be freed by the caller.
  *
  * The returned string resides on the heap; the caller is responsible
  * for freeing it.
  *
- * @param [in] err return error code
- * @return the error string
+ * \param [in] err return error code
+ * \return the error string
+ *
+ * \since v0.1
  */
 AMQP_DEPRECATED(
   AMQP_PUBLIC_FUNCTION
@@ -1239,6 +1548,18 @@ AMQP_DEPRECATED(
   AMQP_CALL amqp_error_string(int err)
 );
 
+
+/**
+ * Get the error string for the given error code.
+ *
+ * Get an error string associated with an error code. The string is statically
+ * allocated and does not need to be freed
+ *
+ * \param [in] err
+ * \return the error string
+ *
+ * \since v0.4.0
+ */
 AMQP_PUBLIC_FUNCTION
 const char *
 AMQP_CALL amqp_error_string2(int err);
@@ -1250,14 +1571,16 @@ AMQP_CALL amqp_error_string2(int err);
  * This is an internal function and is not typically used by
  * client applications
  *
- * @param [in] encoded the buffer containing the serialized data
- * @param [in] pool memory pool used to allocate the table entries from
- * @param [in] output the amqp_table_t structure to fill in. Any existing
+ * \param [in] encoded the buffer containing the serialized data
+ * \param [in] pool memory pool used to allocate the table entries from
+ * \param [in] output the amqp_table_t structure to fill in. Any existing
  *             entries will be erased
- * @param [in,out] offset The offset into the encoded buffer to start
+ * \param [in,out] offset The offset into the encoded buffer to start
  *                 reading the serialized table. It will be updated
  *                 by this function to end of the table
- * @return 0 on success, > 1 on error
+ * \return 0 on success, > 1 on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1270,25 +1593,47 @@ AMQP_CALL amqp_decode_table(amqp_bytes_t encoded, amqp_pool_t *pool,
  * This is an internal function and is not typically used by
  * client applications
  *
- * @param [in] encoded the buffer where to serialize the table to
- * @param [in] input the amqp_table_t to serialize
- * @param [in,out] offset The offset into the encoded buffer to start
+ * \param [in] encoded the buffer where to serialize the table to
+ * \param [in] input the amqp_table_t to serialize
+ * \param [in,out] offset The offset into the encoded buffer to start
  *                 writing the serialized table. It will be updated
  *                 by this function to where writing left off
- * @return 0 on success, > 1 on error
+ * \return 0 on success, > 1 on error
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
 AMQP_CALL amqp_encode_table(amqp_bytes_t encoded, amqp_table_t *input, size_t *offset);
 
+
+/**
+ * Create a deep-copy of an amqp_table_t object
+ *
+ * Creates a deep-copy of an amqp_table_t object, using the provided pool
+ * object to allocate the necessary memory. This memory can be freed later by
+ * call recycle_amqp_pool(), or empty_amqp_pool()
+ *
+ * \param [in] original
+ * \param [in,out] clone
+ * \param [in] pool
+ * \return
+ *
+ * \since v0.4.0
+ */
 AMQP_PUBLIC_FUNCTION
 int
 AMQP_CALL amqp_table_clone(amqp_table_t *original, amqp_table_t *clone, amqp_pool_t *pool);
 
+/**
+ * A message object
+ *
+ * \since v0.4.0
+ */
 typedef struct amqp_message_t_ {
-  amqp_basic_properties_t properties;
-  amqp_bytes_t body;
-  amqp_pool_t pool;
+  amqp_basic_properties_t properties; /**< message properties */
+  amqp_bytes_t body;                  /**< message body */
+  amqp_pool_t pool;                   /**< pool used to allocate properties */
 } amqp_message_t;
 
 /**
@@ -1306,6 +1651,8 @@ typedef struct amqp_message_t_ {
  *                 allocating/destroying the amqp_message_t object itself.
  * \param [in] flags pass in 0. Currently unused.
  * \returns a amqp_rpc_reply_t object. ret.reply_type == AMQP_RESPONSE_NORMAL on success.
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1317,19 +1664,26 @@ AMQP_CALL amqp_read_message(amqp_connection_state_t state,
  * Frees memory associated with a amqp_message_t allocated in amqp_read_message
  *
  * \param [in] message
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 void
 AMQP_CALL amqp_destroy_message(amqp_message_t *message);
 
+/**
+ * Envelope object
+ *
+ * \since v0.4.0
+ */
 typedef struct amqp_envelope_t_ {
-  amqp_channel_t channel;
-  amqp_bytes_t consumer_tag;
-  uint64_t delivery_tag;
-  amqp_boolean_t redelivered;
-  amqp_bytes_t exchange;
-  amqp_bytes_t routing_key;
-  amqp_message_t message;
+  amqp_channel_t channel;           /**< channel message was delivered on */
+  amqp_bytes_t consumer_tag;        /**< the consumer tag the message was delivered to */
+  uint64_t delivery_tag;            /**< the messages delivery tag */
+  amqp_boolean_t redelivered;       /**< flag indicating whether this message is being redelivered */
+  amqp_bytes_t exchange;            /**< exchange this message was published to */
+  amqp_bytes_t routing_key;         /**< the routing key this message was published with */
+  amqp_message_t message;           /**< the message */
 } amqp_envelope_t;
 
 /**
@@ -1359,6 +1713,8 @@ typedef struct amqp_envelope_t_ {
  *          than AMQP_BASIC_DELIVER_METHOD was received, the caller should call
  *          amqp_simple_wait_frame() to read this frame and take appropriate
  *          action.
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 amqp_rpc_reply_t
@@ -1370,7 +1726,8 @@ AMQP_CALL amqp_consume_message(amqp_connection_state_t state,
  * Frees memory associated iwth a amqp_envelope_t allocated in amqp_consume_message
  *
  * \param [in] envelope
- * \returns
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -1379,6 +1736,8 @@ AMQP_CALL amqp_destroy_envelope(amqp_envelope_t *envelope);
 
 /**
  * Parameters used to connect to the RabbitMQ broker
+ *
+ * \since v0.1
  */
 struct amqp_connection_info {
   char *user;                 /**< the username to authenticate with the broker, default on most broker is 'guest' */
@@ -1399,7 +1758,9 @@ struct amqp_connection_info {
  * - vhost: "/"
  * - port: 5672
  *
- * @param [out] parsed the connection info to set defaults on
+ * \param [out] parsed the connection info to set defaults on
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 void
@@ -1416,9 +1777,11 @@ AMQP_CALL amqp_default_connection_info(struct amqp_connection_info *parsed);
  *  amqp://guest:guest\@localhost:5672//
  *  amqp://guest:guest\@localhost/myvhost
  *
- * @param [in] url URI to parse
- * @param [out] parsed the connection info gleaned from the URI
- * @returns 0 on success, anything else indicates failure
+ * \param [in] url URI to parse
+ * \param [out] parsed the connection info gleaned from the URI
+ * \returns 0 on success, anything else indicates failure
+ *
+ * \since v0.1
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1439,6 +1802,8 @@ AMQP_CALL amqp_parse_url(char *url, struct amqp_connection_info *parsed);
  * \param [in] port Connect on this remote port.
  *
  * \return Zero upon success, non-zero otherwise.
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1459,6 +1824,8 @@ amqp_socket_open(amqp_socket_t *self, const char *host, int port);
  * \param [in] timeout Max allowed time to spent on opening. If NULL - run in blocking mode
  *
  * \return Zero upon success, non-zero otherwise.
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 int
@@ -1475,12 +1842,22 @@ amqp_socket_open_noblock(amqp_socket_t *self, const char *host, int port, struct
  * \param [in,out] self A socket object.
  *
  * \return The underlying socket descriptor.
+ *
+ * \since v0.4.0
  */
 AMQP_PUBLIC_FUNCTION
 int
 AMQP_CALL
 amqp_socket_get_sockfd(amqp_socket_t *self);
 
+/**
+ * Get the socket object associated with a amqp_connection_state_t
+ *
+ * \param [in] state the connection object to get the socket from
+ * \return a pointer to the socket object, or NULL if one has not been assigned
+ *
+ * \since v0.4.0
+ */
 AMQP_PUBLIC_FUNCTION
 amqp_socket_t *
 amqp_get_socket(amqp_connection_state_t state);
