@@ -657,33 +657,32 @@ typedef struct amqp_socket_t_ amqp_socket_t;
  */
 typedef enum amqp_status_enum_
 {
-  AMQP_STATUS_OK =                         0x0,     /**< The operation was
-                                                      successful */
+  AMQP_STATUS_OK =                         0x0,     /**< Operation successful */
   AMQP_STATUS_NO_MEMORY =                 -0x0001,  /**< Memory allocation
                                                       failed */
-  AMQP_STATUS_BAD_AMQP_DATA =             -0x0002,
-  AMQP_STATUS_UNKNOWN_CLASS =             -0x0003,
-  AMQP_STATUS_UNKNOWN_METHOD =            -0x0004,
-  AMQP_STATUS_HOSTNAME_RESOLUTION_FAILED= -0x0005,
-  AMQP_STATUS_INCOMPATIBLE_AMQP_VERSION = -0x0006,
-  AMQP_STATUS_CONNECTION_CLOSED =         -0x0007,
-  AMQP_STATUS_BAD_URL =                   -0x0008,
-  AMQP_STATUS_SOCKET_ERROR =              -0x0009,
-  AMQP_STATUS_INVALID_PARAMETER =         -0x000A,
-  AMQP_STATUS_TABLE_TOO_BIG =             -0x000B,
-  AMQP_STATUS_WRONG_METHOD =              -0x000C,
-  AMQP_STATUS_TIMEOUT =                   -0x000D,
-  AMQP_STATUS_TIMER_FAILURE =             -0x000E,
-  AMQP_STATUS_HEARTBEAT_TIMEOUT =         -0x000F,
-  AMQP_STATUS_UNEXPECTED_STATE =          -0x0010,
+  AMQP_STATUS_BAD_AMQP_DATA =             -0x0002, /**< */
+  AMQP_STATUS_UNKNOWN_CLASS =             -0x0003, /**< */
+  AMQP_STATUS_UNKNOWN_METHOD =            -0x0004, /**< */
+  AMQP_STATUS_HOSTNAME_RESOLUTION_FAILED= -0x0005, /**< */
+  AMQP_STATUS_INCOMPATIBLE_AMQP_VERSION = -0x0006, /**< */
+  AMQP_STATUS_CONNECTION_CLOSED =         -0x0007, /**< */
+  AMQP_STATUS_BAD_URL =                   -0x0008, /**< */
+  AMQP_STATUS_SOCKET_ERROR =              -0x0009, /**< */
+  AMQP_STATUS_INVALID_PARAMETER =         -0x000A, /**< */
+  AMQP_STATUS_TABLE_TOO_BIG =             -0x000B, /**< */
+  AMQP_STATUS_WRONG_METHOD =              -0x000C, /**< */
+  AMQP_STATUS_TIMEOUT =                   -0x000D, /**< */
+  AMQP_STATUS_TIMER_FAILURE =             -0x000E, /**< */
+  AMQP_STATUS_HEARTBEAT_TIMEOUT =         -0x000F, /**< */
+  AMQP_STATUS_UNEXPECTED_STATE =          -0x0010, /**< */
 
-  AMQP_STATUS_TCP_ERROR =                 -0x0100,
-  AMQP_STATUS_TCP_SOCKETLIB_INIT_ERROR =  -0x0101,
+  AMQP_STATUS_TCP_ERROR =                 -0x0100, /**< */
+  AMQP_STATUS_TCP_SOCKETLIB_INIT_ERROR =  -0x0101, /**< */
 
-  AMQP_STATUS_SSL_ERROR =                 -0x0200,
-  AMQP_STATUS_SSL_HOSTNAME_VERIFY_FAILED= -0x0201,
-  AMQP_STATUS_SSL_PEER_VERIFY_FAILED =    -0x0202,
-  AMQP_STATUS_SSL_CONNECTION_FAILED =     -0x0203
+  AMQP_STATUS_SSL_ERROR =                 -0x0200, /**< */
+  AMQP_STATUS_SSL_HOSTNAME_VERIFY_FAILED= -0x0201, /**< */
+  AMQP_STATUS_SSL_PEER_VERIFY_FAILED =    -0x0202, /**< */
+  AMQP_STATUS_SSL_CONNECTION_FAILED =     -0x0203  /**< */
 } amqp_status_enum;
 
 AMQP_END_DECLS
@@ -933,10 +932,12 @@ void
 AMQP_CALL amqp_bytes_free(amqp_bytes_t bytes);
 
 /**
- * Creates a new amqp_connection_state_t object
+ * Allocate and initialize a new amqp_connection_state_t object
  *
  * amqp_connection_state_t objects created with this function
- * should be freed with amqp_destroy_connection
+ * should be freed with amqp_destroy_connection()
+ *
+ * \returns an opaque pointer on success, NULL or 0 on failure.
  *
  * \sa amqp_destroy_connection()
  *
@@ -948,6 +949,13 @@ AMQP_CALL amqp_new_connection(void);
 
 /**
  * Get the underlying socket descriptor for the connection
+ *
+ * \warning Use the socket returned from this function carefully, incorrect use
+ * of the socket outside of the library will lead to undefined behavior.
+ * Additionally rabbitmq-c may use the socket differently version-to-version,
+ * what make work in one version, make break in the next version. Be sure to
+ * throughly test any applications that use the socket returned by this
+ * function especially when using a newer version of rabbitmq-c
  *
  * \param [in] state the connection object
  * \returns the socket descriptor if one has been set, -1 otherwise
@@ -1023,7 +1031,8 @@ AMQP_CALL amqp_tune_connection(amqp_connection_state_t state,
 /**
  * Get the maximum number of channels the connection can handle
  *
- * This number can be changed using the amqp_tune_connection function
+ * The maximum number of channels is set when connection negotiation takes
+ * place in amqp_login() or amqp_login_with_properties().
  *
  * \param [in] state the connection object
  * \return the maximum number of channels. 0 if there is no limit
@@ -1035,13 +1044,19 @@ int
 AMQP_CALL amqp_get_channel_max(amqp_connection_state_t state);
 
 /**
- * Destroys a connection object
+ * Destroys an amqp_connection_state_t object
  *
- * Destroys a connection object created with amqp_new_connection
- * This function will free all memory and close any sockets
- * associated with the connection
+ * Destroys a amqp_connection_state_t object that was created with
+ * amqp_new_connection(). If the connection with the broker is open, it will be
+ * implicitly closed with a reply code of 200 (success). Any memory that
+ * would be freed with amqp_maybe_release_buffers() or
+ * amqp_maybe_release_buffers_on_channel() will be freed, and use of that
+ * memory will caused undefined behavior.
  *
  * \param [in] state the connection object
+ * \return AMQP_STATUS_OK on success, amqp_status_enum value otherwise
+ *
+ * \sa amqp_new_connection()
  *
  * \since v0.1
  */
@@ -1050,15 +1065,33 @@ int
 AMQP_CALL amqp_destroy_connection(amqp_connection_state_t state);
 
 /**
- * Handle input
+ * Process incoming data
  *
- * For a given input buffer and connection state potentially decode
- * a frame from it
+ * \warning This is a low-level function intended for those who want to
+ *  have greater control over input and output over the socket from the
+ *  broker. Correctly using this function requires in-depth knowledge of AMQP
+ *  and rabbitmq-c.
+ *
+ * For a given buffer of data received from the broker, decode the first
+ * frame in the buffer. If more than one frame is contained in the input buffer
+ * the return value will be less than the received_data size, the caller should
+ * adjust received_data buffer descriptor to point to the beginning of the
+ * buffer + the return value.
  *
  * \param [in] state the connection object
- * \param [in] received_data a buffer of the data to be decoded
- * \param [in] decoded_frame the frame
- * \return 0 on success, 0 > on error
+ * \param [in] received_data a buffer of data received from the broker. The
+ *  function will return the number of bytes of the buffer it used. The
+ *  function copies these bytes to an internal buffer: this part of the buffer
+ *  may be reused after this function successfully completes.
+ * \param [in/out] decoded_frame caller should pass in a pointer to an
+ *  amqp_frame_t struct. If there is enough data in received_data for a
+ *  complete frame, decoded_frame->frame_type will be set to something OTHER
+ *  than 0. decoded_frame may contain members pointing to memory owned by
+ *  the state object. This memory can be recycled with amqp_maybe_release_buffers()
+ *  or amqp_maybe_release_buffers_on_channel()
+ * \return number of bytes consumed from received_data or 0 if a 0-length
+ *  buffer was passed. On error the return value will be negative, the value
+ *  can be compared against amqp_status_enum values to determine the cause.
  *
  * \since v0.1
  */
@@ -1069,14 +1102,19 @@ AMQP_CALL amqp_handle_input(amqp_connection_state_t state,
                             amqp_frame_t *decoded_frame);
 
 /**
- * Check to see if the connection is in a state it can release its internal buffers
+ * Check to see if connection memory can be released
  *
- * Call this to check before calling amqp_release_buffers.
+ * \deprecated This function is deprecated in favor of
+ *  amqp_maybe_release_buffers() or amqp_maybe_release_buffers_on_channel()
  *
- * Alternatively call amqp_maybe_release_buffers to do this all in one step
+ * Checks the state of an amqp_connection_state_t object to see if
+ * amqp_release_buffers() can be called successfully.
  *
  * \param [in] state the connection object
  * \returns TRUE if the buffers can be released FALSE otherwise
+ *
+ * \sa amqp_release_buffers() amqp_maybe_release_buffers()
+ *  amqp_maybe_release_buffers_on_channel()
  *
  * \since v0.1
  */
@@ -1085,13 +1123,26 @@ amqp_boolean_t
 AMQP_CALL amqp_release_buffers_ok(amqp_connection_state_t state);
 
 /**
- * Release connect object internal buffers
+ * Release amqp_connection_state_t owned memory
  *
- * Call amqp_release_buffers_ok before calling this to ensure
- * the connection is in a state that it can release the buffers.
- * failing to do this will cause the program to abort.
+ * \deprecated This function is deprecated in favor of
+ *  amqp_maybe_release_buffers() or amqp_maybe_release_buffers_on_channel()
+ *
+ * \warning caller should ensure amqp_release_buffers_ok() returns true before
+ *  calling this function. Failure to do so may result in abort() being called.
+ *
+ * Release memory owned by the amqp_connection_state_t for reuse by the
+ * library. Use of any memory returned by the library before this function is
+ * called will result in undefined behavior.
+ *
+ * \note internally rabbitmq-c tries to reuse memory when possible so its
+ *  possible that calling this function may not have a noticable effect
+ *  on memory usage.
  *
  * \param [in] state the connection object
+ *
+ * \sa amqp_release_buffers_ok() amqp_maybe_release_buffers()
+ *  amqp_maybe_release_buffers_on_channel()
  *
  * \since v0.1
  */
@@ -1723,7 +1774,7 @@ AMQP_CALL amqp_consume_message(amqp_connection_state_t state,
                                struct timeval *timeout, int flags);
 
 /**
- * Frees memory associated iwth a amqp_envelope_t allocated in amqp_consume_message
+ * Frees memory associated with a amqp_envelope_t allocated in amqp_consume_message
  *
  * \param [in] envelope
  *
