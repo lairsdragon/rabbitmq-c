@@ -1,3 +1,9 @@
+librabbitmq (1.0.1-2) unstable; urgency=low
+
+  * Imported to my Repo
+
+ -- Steffen Weinreich <steffen.weinreich@ic3s.de>  Mon, 05 Aug 2013 14:51:34 +0200
+
 librabbitmq (1.0.1-1ubuntu1) precise; urgency=low
 
   * bump package version
